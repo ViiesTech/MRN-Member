@@ -1,0 +1,85 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "node_modules/@react-native-vector-icons/ant-design/fonts/AntDesign.ttf",
+      "sha1": "850767cc9afac4325bce220bca29cdb6872379f5"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/entypo/fonts/Entypo.ttf",
+      "sha1": "8749fb79a6011705fbb1583fcdf300b52cab9adf"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/feather/fonts/Feather.ttf",
+      "sha1": "a6ca45c336a9357768eac614913416003e70bf12"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome/fonts/FontAwesome.ttf",
+      "sha1": "13b1eab65a983c7a73bc7997c479d66943f7c6cb"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome5/fonts/FontAwesome5_Brands.ttf",
+      "sha1": "8ab907083fecaaa2a9ec93b27f884ad74573705c"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome5/fonts/FontAwesome5_Regular.ttf",
+      "sha1": "c34acd6818df6db6be41a2e331886765d601f2eb"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome5/fonts/FontAwesome5_Solid.ttf",
+      "sha1": "eb8914f6b1797b45ee0883e6089d92695d9f9441"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Brands.ttf",
+      "sha1": "da6f537cd597b76d264970f1c95e4beebc82fde9"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Regular.ttf",
+      "sha1": "6e7f0651059eea9783ea8b28892b2c979c2f7f30"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/fontawesome6/fonts/FontAwesome6_Solid.ttf",
+      "sha1": "780a8ff16ebb681f85d5d30fac94ebe845a12b5e"
+    },
+    {
+      "path": "node_modules/@react-native-vector-icons/ionicons/fonts/Ionicons.ttf",
+      "sha1": "3a656ee69b64ccb1e57f1721f7659b50c1fb56ef"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-Bold.ttf",
+      "sha1": "3e455f517354a45807648fbd3d71adbab2f4e905"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-ExtraBold.ttf",
+      "sha1": "0bece58fb4b50d007a69fdcb5b117bda8706995e"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-ExtraLight.ttf",
+      "sha1": "1bc09b9d781ae879134d8d7a5cf8885efbe89481"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-Italic.ttf",
+      "sha1": "d1e390abd4e0a9b22ec0a48b543cb6d6c2d6360a"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-Light.ttf",
+      "sha1": "30bc50e45fd3d8099e7d46d8ded5786b71ccdd5f"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-Medium.ttf",
+      "sha1": "f81633398187756a347bc6d43aad7a8fc356171b"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-Regular.ttf",
+      "sha1": "cb6cc5710764b9f06b8d8c923f961e3c1ceb7a59"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-SemiBold.ttf",
+      "sha1": "0e6b2ab8d1919b278a764ae7a884796c75fa9c49"
+    },
+    {
+      "path": "src/assets/fonts/Roboto-Thin.ttf",
+      "sha1": "876e1fffd9408cd94b1978facfe0423cb9c7b201"
+    }
+  ]
+}
