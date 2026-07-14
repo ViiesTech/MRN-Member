@@ -1,4 +1,4 @@
-package com.mrnmember
+package com.mrnmember.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

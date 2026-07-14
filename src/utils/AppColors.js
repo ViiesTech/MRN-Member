@@ -10,4 +10,5 @@ export const AppColors = {
   appGradient: ['#033E82', '#1077F2', '#033E82'],
   btnBorder: '#E1E1D9',
   bodyText: '#50555C',
+  introTabInactiveText: '#07305F',
 };

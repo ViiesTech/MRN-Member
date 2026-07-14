@@ -1,4 +1,4 @@
-package com.mrnmember
+package com.mrnmember.app
 
 import android.app.Application
 import com.facebook.react.PackageList

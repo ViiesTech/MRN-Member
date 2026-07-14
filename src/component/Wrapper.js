@@ -3,8 +3,10 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import {
+  Dimensions,
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
@@ -44,6 +46,7 @@ const Wrapper = ({
   const scrollYRef = useRef(0);
   const keyboardTopRef = useRef(0);
   const focusedInputRef = useRef(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const contentStyle = showPadding ? styles.content : styles.contentWithoutPadding;
   const scrollContentStyle = showPadding
     ? styles.scrollContent
@@ -56,7 +59,13 @@ const Wrapper = ({
     }
 
     const showListener = Keyboard.addListener('keyboardDidShow', event => {
-      keyboardTopRef.current = event.endCoordinates?.screenY ?? 0;
+      const nextKeyboardHeight = event.endCoordinates?.height ?? 0;
+      const reportedKeyboardTop = event.endCoordinates?.screenY;
+
+      setKeyboardHeight(nextKeyboardHeight);
+      keyboardTopRef.current =
+        reportedKeyboardTop ||
+        Dimensions.get('screen').height - nextKeyboardHeight;
 
       setTimeout(() => {
         const input = focusedInputRef.current?.current;
@@ -87,6 +96,7 @@ const Wrapper = ({
     const hideListener = Keyboard.addListener('keyboardDidHide', () => {
       keyboardTopRef.current = 0;
       focusedInputRef.current = null;
+      setKeyboardHeight(0);
     });
 
     return () => {
@@ -132,6 +142,14 @@ const Wrapper = ({
     [isScroll],
   );
 
+  const androidKeyboardSpacerStyle =
+    isKeyboardType &&
+    isScroll &&
+    Platform.OS === 'android' &&
+    keyboardHeight > 0
+      ? { paddingBottom: keyboardHeight + responsiveHeight(2) }
+      : null;
+
   const content = isScroll ? (
     <ScrollView
       ref={scrollRef}
@@ -146,6 +164,7 @@ const Wrapper = ({
       contentContainerStyle={[
         scrollContentStyle,
         contentContainerStyle,
+        androidKeyboardSpacerStyle,
       ]}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"

@@ -34,6 +34,7 @@ const AppButton = ({
   style,
   contentStyle,
   textStyle,
+  textColor,
   activeOpacity = 0.85,
 }) => {
   const isDisabled = disabled || loading;
@@ -64,7 +65,10 @@ const AppButton = ({
         contentStyle,
       ]}>
       {finalLeftIcon}
-      <AppText numberOfLines={1} style={[styles.title, textStyle]}>
+      <AppText
+        color={textColor ?? AppColors.white}
+        numberOfLines={1}
+        style={[styles.title, textStyle]}>
         {title}
       </AppText>
       {finalRightIcon}
@@ -171,7 +175,6 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   title: {
-    color: AppColors.white,
     fontFamily: FontFamily.semiBold,
     fontSize: responsiveFontSize(1.9),
   },

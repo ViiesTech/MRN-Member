@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   AppButton,
   AppHeader,
@@ -64,7 +70,14 @@ const EnterDetailsScreen = ({ navigation, setSafeAreaColor }) => {
   };
 
   return (
-    <Wrapper type="keyboard" isScroll contentContainerStyle={styles.container}>
+    <Wrapper
+      type="keyboard"
+      isScroll
+      contentContainerStyle={
+        Platform.OS === 'android'
+          ? styles.androidContainer
+          : styles.container
+      }>
       <AppHeader
         variant="left"
         showBack
@@ -149,6 +162,10 @@ const EnterDetailsScreen = ({ navigation, setSafeAreaColor }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: AppColors.appBgColor,
+  },
+  androidContainer: {
+    flexGrow: 1,
     backgroundColor: AppColors.appBgColor,
   },
   backHeader: {

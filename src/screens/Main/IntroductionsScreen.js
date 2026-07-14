@@ -176,7 +176,7 @@ const IntroductionsScreen = ({ navigation, setSafeAreaColor }) => {
 
           return (
             <AppButton
-              key={filter.status}
+              key={`${filter.status}-${isSelected ? 'active' : 'inactive'}`}
               title={filter.label}
               onPress={() => {
                 setSelectedFilter(filter);
@@ -184,15 +184,16 @@ const IntroductionsScreen = ({ navigation, setSafeAreaColor }) => {
               }}
               bordered={!isSelected}
               borderColor={AppColors.appThemeBlue}
+              variant="solid"
+              textColor={
+                isSelected ? AppColors.white : AppColors.introTabInactiveText
+              }
               style={[
                 styles.filterButton,
                 isSelected ? styles.filterButtonActive : styles.filterButtonIdle,
               ]}
               contentStyle={styles.filterContent}
-              textStyle={[
-                styles.filterText,
-                isSelected ? styles.filterTextActive : styles.filterTextIdle,
-              ]}
+              textStyle={styles.filterText}
             />
           );
         })}
@@ -287,15 +288,19 @@ const styles = StyleSheet.create({
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: responsiveWidth(1.55),
     marginTop: responsiveHeight(2.2),
   },
   filterButton: {
     width: 'auto',
+    alignSelf: 'flex-start',
+    flexGrow: 0,
+    flexShrink: 0,
     minHeight: responsiveHeight(3.85),
     height: responsiveHeight(3.85),
     borderRadius: responsiveWidth(2),
-    paddingHorizontal: responsiveWidth(1.7),
+    paddingHorizontal: responsiveWidth(1.35),
   },
   filterButtonActive: {
     backgroundColor: AppColors.appThemeBlue,
@@ -305,17 +310,12 @@ const styles = StyleSheet.create({
   },
   filterContent: {
     gap: 0,
+    flexShrink: 0,
   },
   filterText: {
     fontFamily: FontFamily.medium,
     fontSize: responsiveFontSize(1.45),
     lineHeight: responsiveFontSize(1.75),
-  },
-  filterTextActive: {
-    color: AppColors.white,
-  },
-  filterTextIdle: {
-    color: AppColors.appThemeBlue,
   },
   list: {
     marginTop: responsiveHeight(3.3),

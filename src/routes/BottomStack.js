@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,6 +18,7 @@ import {
 } from '../utils/Responsive_Dimensions';
 
 const Tab = createBottomTabNavigator();
+const isAndroid = Platform.OS === 'android';
 
 const tabIcons = {
   Home: AppIcons.home,
@@ -41,7 +42,12 @@ const TabIcon = ({ routeName, focused }) => {
   const iconSize = getIconSize(routeName);
 
   return (
-    <View style={[styles.iconWrap, focused && styles.activeIconWrap]}>
+    <View
+      style={[
+        styles.iconWrap,
+        isAndroid && styles.androidIconWrap,
+        focused && styles.activeIconWrap,
+      ]}>
       <SVGXml
         icon={tabIcons[routeName]}
         width={iconSize.width}
@@ -51,30 +57,54 @@ const TabIcon = ({ routeName, focused }) => {
   );
 };
 
-const TabBarGradient = () => (
-  <LinearGradient
-    colors={AppColors.appGradient}
-    start={{ x: 0, y: 0.5 }}
-    end={{ x: 1, y: 0.5 }}
-    style={styles.tabBarGradient}
-  />
-);
+const TabBarGradient = () => {
+  if (isAndroid) {
+    return (
+      <View style={styles.androidTabBarGradientFallback}>
+        <LinearGradient
+          colors={[
+            AppColors.appThemeBlue,
+            AppColors.appThemeDimBlue,
+            AppColors.appThemeBlue,
+          ]}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.androidTabBarGradient}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <LinearGradient
+      colors={AppColors.appGradient}
+      start={{ x: 0, y: 0.5 }}
+      end={{ x: 1, y: 0.5 }}
+      style={styles.tabBarGradient}
+    />
+  );
+};
 
 const getScreenOptions = ({ route, bottomInset }) => ({
   headerShown: false,
   tabBarActiveTintColor: AppColors.white,
   tabBarInactiveTintColor: AppColors.white,
   tabBarAllowFontScaling: false,
-  tabBarLabelStyle: styles.tabLabel,
-  tabBarStyle: [
-    styles.tabBar,
-    {
-      height: responsiveHeight(6.8) + bottomInset,
-      paddingBottom: Math.max(bottomInset, responsiveHeight(0.8)),
-    },
-  ],
-  tabBarItemStyle: styles.tabBarItem,
-  tabBarBackground: TabBarGradient,
+  tabBarLabelStyle: isAndroid ? styles.androidTabLabel : styles.tabLabel,
+  tabBarStyle: isAndroid
+    ? [styles.tabBar, styles.androidTabBar]
+    : [
+        styles.tabBar,
+        {
+          height: responsiveHeight(6.8) + bottomInset,
+          paddingBottom: Math.max(bottomInset, responsiveHeight(0.8)),
+        },
+      ],
+  tabBarItemStyle: isAndroid
+    ? styles.androidTabBarItem
+    : styles.tabBarItem,
+  tabBarBackground: () => <TabBarGradient />,
   tabBarIcon: ({ focused }) => (
     <TabIcon routeName={route.name} focused={focused} />
   ),
@@ -127,6 +157,20 @@ const styles = StyleSheet.create({
   tabBarGradient: {
     flex: 1,
   },
+  androidTabBar: {
+    height: responsiveHeight(10.2),
+    backgroundColor: 'transparent',
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+  androidTabBarGradientFallback: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: AppColors.appThemeBlue,
+  },
+  androidTabBarGradient: {
+    ...StyleSheet.absoluteFillObject,
+    height: responsiveHeight(10.2),
+  },
   tabBarItem: {
     paddingTop: responsiveHeight(0.25),
     paddingBottom: responsiveHeight(0.45),
@@ -139,12 +183,28 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     includeFontPadding: false,
   },
+  androidTabBarItem: {
+    paddingTop: responsiveHeight(0.8),
+    paddingBottom: responsiveHeight(1),
+  },
+  androidTabLabel: {
+    paddingBottom: 0,
+    marginTop: responsiveHeight(0.35),
+    color: AppColors.white,
+    fontFamily: FontFamily.bold,
+    fontSize: responsiveFontSize(1.45),
+    lineHeight: responsiveFontSize(2),
+    includeFontPadding: false,
+  },
   iconWrap: {
     width: responsiveWidth(8),
     height: responsiveHeight(3.05),
     alignItems: 'center',
     justifyContent: 'center',
     opacity: 0.82,
+  },
+  androidIconWrap: {
+    height: responsiveHeight(3),
   },
   activeIconWrap: {
     opacity: 1,
