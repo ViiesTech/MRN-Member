@@ -19,6 +19,10 @@ import { useSigninMutation } from '../../redux/Services/authApi';
 import { setCredentials } from '../../redux/slices/authSlice';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { showToast } from '../../utils/Toast';
+import {
+  isMemberUser,
+  showMemberAccountRequiredToast,
+} from '../../utils/authRole';
 
 const LoginScreen = ({ navigation, setSafeAreaColor }) => {
   const [email, setEmail] = useState('');
@@ -42,6 +46,15 @@ const LoginScreen = ({ navigation, setSafeAreaColor }) => {
         password,
       }).unwrap();
 
+      if (
+        response?.success &&
+        response?.data?.user &&
+        !isMemberUser(response.data.user)
+      ) {
+        showMemberAccountRequiredToast(showToast);
+        return;
+      }
+
       if (response?.success && response?.isVerified === false) {
         showToast(response?.message || 'Please verify your email.');
         navigation.navigate('EmailVerification', {
@@ -55,6 +68,11 @@ const LoginScreen = ({ navigation, setSafeAreaColor }) => {
 
       if (!response?.success) {
         showToast('Login failed', response?.message || 'Please try again.', 'error');
+        return;
+      }
+
+      if (!isMemberUser(response?.data?.user)) {
+        showMemberAccountRequiredToast(showToast);
         return;
       }
 

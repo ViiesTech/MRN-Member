@@ -2,11 +2,14 @@ import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import BottomStack from './BottomStack';
 import ChatScreen from '../screens/Main/ChatScreen';
+import ChangePasswordScreen from '../screens/Main/ChangePasswordScreen';
 import IntroductionDetailsScreen from '../screens/Main/IntroductionDetailsScreen';
 import MembershipFormScreen from '../screens/Main/MembershipFormScreen';
 import MembershipStatusScreen from '../screens/Main/MembershipStatusScreen';
 import NotificationsScreen from '../screens/Main/NotificationsScreen';
 import PaymentScreen from '../screens/Main/PaymentScreen';
+import ProfileScreen from '../screens/Main/ProfileScreen';
+import WebContentScreen from '../screens/Main/WebContentScreen';
 
 const Stack = createStackNavigator();
 
@@ -33,6 +36,19 @@ const MainStack = ({ setSafeAreaColor }) => {
       <Stack.Screen name="Chat">
         {props => (
           <ChatScreen {...props} setSafeAreaColor={setSafeAreaColor} />
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="Profile">
+        {props => (
+          <ProfileScreen {...props} setSafeAreaColor={setSafeAreaColor} />
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="ChangePassword">
+        {props => (
+          <ChangePasswordScreen
+            {...props}
+            setSafeAreaColor={setSafeAreaColor}
+          />
         )}
       </Stack.Screen>
       <Stack.Screen name="MembershipForm">
@@ -87,6 +103,14 @@ const MainStack = ({ setSafeAreaColor }) => {
       <Stack.Screen name="NotificationList">
         {props => (
           <NotificationsScreen
+            {...props}
+            setSafeAreaColor={setSafeAreaColor}
+          />
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="WebContent">
+        {props => (
+          <WebContentScreen
             {...props}
             setSafeAreaColor={setSafeAreaColor}
           />

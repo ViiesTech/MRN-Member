@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import SVGXml from '../component/SvgXml';
-import { AppIcons } from '../assets/Icons/Index';
+import { FilledTabIcons } from '../assets/Icons/FilledTabIcons';
 import HomeScreen from '../screens/Main/HomeScreen';
 import IntroductionsScreen from '../screens/Main/IntroductionsScreen';
 import MoreScreen from '../screens/Main/MoreScreen';
@@ -19,13 +19,7 @@ import {
 
 const Tab = createBottomTabNavigator();
 const isAndroid = Platform.OS === 'android';
-
-const tabIcons = {
-  Home: AppIcons.home,
-  Introductions: AppIcons.introduction,
-  Reports: AppIcons.reports,
-  More: AppIcons.more2 || AppIcons.more,
-};
+const inactiveIconColor = '#AAC1E3';
 
 const getIconSize = routeName => {
   switch (routeName) {
@@ -40,6 +34,8 @@ const getIconSize = routeName => {
 
 const TabIcon = ({ routeName, focused }) => {
   const iconSize = getIconSize(routeName);
+  const iconColor = focused ? AppColors.white : inactiveIconColor;
+  const icon = FilledTabIcons[routeName].replace(/white/g, iconColor);
 
   return (
     <View
@@ -49,7 +45,7 @@ const TabIcon = ({ routeName, focused }) => {
         focused && styles.activeIconWrap,
       ]}>
       <SVGXml
-        icon={tabIcons[routeName]}
+        icon={icon}
         width={iconSize.width}
         height={iconSize.height}
       />
@@ -201,7 +197,7 @@ const styles = StyleSheet.create({
     height: responsiveHeight(3.05),
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: 0.82,
+    opacity: 1,
   },
   androidIconWrap: {
     height: responsiveHeight(3),

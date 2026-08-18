@@ -4,11 +4,14 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useSelector } from 'react-redux';
 import AuthStack from './AuthStack';
 import MainStack from './MainStack';
+import { isMemberUser } from '../utils/authRole';
 
 const Stack = createStackNavigator();
 
 const Routes = ({ setSafeAreaColor }) => {
   const token = useSelector(state => state.auth.token);
+  const user = useSelector(state => state.auth.user);
+  const isMemberAuthenticated = Boolean(token && isMemberUser(user));
 
   return (
     <NavigationContainer>
@@ -16,7 +19,7 @@ const Routes = ({ setSafeAreaColor }) => {
         screenOptions={{
           headerShown: false,
         }}>
-        {token ? (
+        {isMemberAuthenticated ? (
           <Stack.Screen name="Main">
             {props => (
               <MainStack {...props} setSafeAreaColor={setSafeAreaColor} />

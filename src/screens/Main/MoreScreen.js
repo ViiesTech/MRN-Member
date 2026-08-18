@@ -1,7 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  AppState,
+  Linking,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
+import { Feather } from '@react-native-vector-icons/feather';
+import notifee, { AuthorizationStatus } from '@notifee/react-native';
 import {
   AppHeader,
   AppText,
@@ -19,6 +28,12 @@ import {
   responsiveWidth,
 } from '../../utils/Responsive_Dimensions';
 import { useSafeAreaColor } from '../../utils/useSafeAreaColor';
+import {
+  DEFAULT_NOTIFICATION_PREFERENCE,
+  loadNotificationPreferences,
+  saveNotificationPreferences,
+} from '../../utils/notificationPreferences';
+import { showToast } from '../../utils/Toast';
 
 const normalizeMembershipStatus = status =>
   `${status ?? ''}`.replace(/\s+/g, '').toLowerCase();
@@ -45,12 +60,29 @@ const formatRole = role => {
   return role.charAt(0).toUpperCase() + role.slice(1);
 };
 
-const createSections = (navigation, membershipStatus, onLogout) => [
+const isNotificationPermissionGranted = status =>
+  status === AuthorizationStatus.AUTHORIZED ||
+  status === AuthorizationStatus.PROVISIONAL;
+
+const createSections = (
+  navigation,
+  membershipStatus,
+  notificationToggle,
+  onLogout,
+) => [
   {
     title: 'Account',
     items: [
-      { label: 'Profile', iconName: 'user' },
-      { label: 'Change Password', iconName: 'lock' },
+      {
+        label: 'Profile',
+        iconName: 'user',
+        onPress: () => navigation.navigate('Profile'),
+      },
+      {
+        label: 'Change Password',
+        iconName: 'lock',
+        onPress: () => navigation.navigate('ChangePassword'),
+      },
       {
         label: 'Apply For Membership',
         iconName: 'award',
@@ -61,16 +93,35 @@ const createSections = (navigation, membershipStatus, onLogout) => [
   {
     title: 'Preferences & Support',
     items: [
-      { label: 'Notification Settings', iconName: 'bell' },
-      { label: 'Help Center', iconName: 'help-circle' },
+      {
+        label: 'Notification Settings',
+        iconName: 'bell',
+        ...notificationToggle,
+      },
+      {
+        label: 'Help Center',
+        iconName: 'help-circle',
+        onPress: () =>
+          navigation.navigate('WebContent', { page: 'helpCenter' }),
+      },
       { label: 'Weekly / Monthly Report', iconName: 'file-text' },
     ],
   },
   {
     title: 'About',
     items: [
-      { label: 'About App', iconName: 'info' },
-      { label: 'Terms & Conditions', iconName: 'file-text' },
+      {
+        label: 'About App',
+        iconName: 'info',
+        onPress: () =>
+          navigation.navigate('WebContent', { page: 'aboutApp' }),
+      },
+      {
+        label: 'Terms & Conditions',
+        iconName: 'file-text',
+        onPress: () =>
+          navigation.navigate('WebContent', { page: 'termsAndConditions' }),
+      },
       {
         label: 'Logout',
         iconName: 'log-out',
@@ -83,9 +134,20 @@ const createSections = (navigation, membershipStatus, onLogout) => [
 const MoreScreen = ({ navigation, setSafeAreaColor }) => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
-  const { data: profileResponse, refetch: refetchProfile } =
-    useGetProfileQuery();
+  const {
+    data: profileResponse,
+    isFetching: isProfileFetching,
+    refetch: refetchProfile,
+  } = useGetProfileQuery();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [notificationPreference, setNotificationPreference] = useState(
+    DEFAULT_NOTIFICATION_PREFERENCE,
+  );
+  const [notificationAuthorization, setNotificationAuthorization] = useState(
+    AuthorizationStatus.NOT_DETERMINED,
+  );
+  const [isNotificationLoading, setIsNotificationLoading] = useState(true);
+  const [isNotificationUpdating, setIsNotificationUpdating] = useState(false);
 
   useSafeAreaColor(setSafeAreaColor, AppColors.appBgColor);
 
@@ -95,13 +157,55 @@ const MoreScreen = ({ navigation, setSafeAreaColor }) => {
     }
   }, [dispatch, profileResponse]);
 
+  const refreshNotificationAuthorization = useCallback(async () => {
+    const settings = await notifee.getNotificationSettings();
+    setNotificationAuthorization(settings.authorizationStatus);
+    return settings.authorizationStatus;
+  }, []);
+
+  useEffect(() => {
+    const loadNotificationSetting = async () => {
+      try {
+        const [storedPreference] = await Promise.all([
+          loadNotificationPreferences(user?._id),
+          refreshNotificationAuthorization(),
+        ]);
+        setNotificationPreference(storedPreference);
+      } catch {
+        showToast(
+          'Unable to load notification setting',
+          'Please try again in a moment.',
+          'error',
+        );
+      } finally {
+        setIsNotificationLoading(false);
+      }
+    };
+
+    loadNotificationSetting();
+  }, [refreshNotificationAuthorization, user?._id]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active') {
+        refreshNotificationAuthorization().catch(() => undefined);
+      }
+    });
+
+    return () => subscription.remove();
+  }, [refreshNotificationAuthorization]);
+
   useFocusEffect(
     useCallback(() => {
       refetchProfile();
     }, [refetchProfile]),
   );
 
-  const handleRefresh = useCallback(async () => {
+  const handlePullRefresh = useCallback(async () => {
+    if (isRefreshing || isProfileFetching) {
+      return;
+    }
+
     setIsRefreshing(true);
 
     try {
@@ -109,11 +213,78 @@ const MoreScreen = ({ navigation, setSafeAreaColor }) => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [refetchProfile]);
+  }, [isProfileFetching, isRefreshing, refetchProfile]);
+
+  const handleHeaderRefresh = useCallback(() => {
+    if (!isRefreshing && !isProfileFetching) {
+      refetchProfile();
+    }
+  }, [isProfileFetching, isRefreshing, refetchProfile]);
+
+  const showHeaderSpinner = isProfileFetching && !isRefreshing;
+
+  const handleNotificationToggle = async nextValue => {
+    if (isNotificationUpdating) {
+      return;
+    }
+
+    setIsNotificationUpdating(true);
+
+    try {
+      if (nextValue) {
+        let nextAuthorization = notificationAuthorization;
+
+        if (!isNotificationPermissionGranted(nextAuthorization)) {
+          const settings = await notifee.requestPermission();
+          nextAuthorization = settings.authorizationStatus;
+          setNotificationAuthorization(nextAuthorization);
+        }
+
+        if (!isNotificationPermissionGranted(nextAuthorization)) {
+          Alert.alert(
+            'Notifications are disabled',
+            'Enable notifications from your device settings to receive updates.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Open Settings',
+                onPress: () => Linking.openSettings(),
+              },
+            ],
+          );
+          return;
+        }
+      }
+
+      await saveNotificationPreferences(user?._id, nextValue);
+      setNotificationPreference(nextValue);
+      showToast(
+        nextValue ? 'Notifications enabled' : 'Notifications disabled',
+      );
+    } catch {
+      showToast(
+        'Unable to update notifications',
+        'Please try again in a moment.',
+        'error',
+      );
+    } finally {
+      setIsNotificationUpdating(false);
+    }
+  };
+
+  const notificationsEnabled =
+    isNotificationPermissionGranted(notificationAuthorization) &&
+    notificationPreference;
 
   const sections = createSections(
     navigation,
     user?.membershipStatus,
+    {
+      toggleValue: notificationsEnabled,
+      toggleLoading: isNotificationLoading || isNotificationUpdating,
+      toggleDisabled: isNotificationLoading || isNotificationUpdating,
+      onToggle: handleNotificationToggle,
+    },
     () => dispatch(clearCredentials()),
   );
 
@@ -121,7 +292,7 @@ const MoreScreen = ({ navigation, setSafeAreaColor }) => {
     <Wrapper
       isScroll
       refreshing={isRefreshing}
-      onRefresh={handleRefresh}
+      onRefresh={handlePullRefresh}
       backgroundColor={AppColors.appBgColor}
       contentContainerStyle={styles.container}>
       <AppHeader
@@ -135,6 +306,22 @@ const MoreScreen = ({ navigation, setSafeAreaColor }) => {
         titleStyle={styles.headerTitle}
         backIconColor={AppColors.appThemeBlue}
         backIconSize={responsiveFontSize(2.5)}
+        onRightPress={handleHeaderRefresh}
+        rightIcon={
+          showHeaderSpinner ? (
+            <ActivityIndicator
+              color={AppColors.appThemeBlue}
+              size="small"
+            />
+          ) : (
+            <Feather
+              name="refresh-cw"
+              color={AppColors.appThemeBlue}
+              size={responsiveFontSize(2.2)}
+            />
+          )
+        }
+        rightButtonStyle={styles.headerRefreshButton}
       />
 
       <View style={styles.profileRow}>
@@ -189,6 +376,10 @@ const styles = StyleSheet.create({
     color: AppColors.appThemeBlue,
     fontFamily: FontFamily.medium,
     fontSize: responsiveFontSize(2),
+  },
+  headerRefreshButton: {
+    width: responsiveWidth(8),
+    height: responsiveWidth(8),
   },
   profileRow: {
     flexDirection: 'row',

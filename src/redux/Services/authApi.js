@@ -3,7 +3,7 @@ import { API_ENDPOINTS, BASE_URL } from '../constants/apiEndpoints';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  tagTypes: ['Introductions'],
+  tagTypes: ['Introductions', 'Profile'],
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
     prepareHeaders: (headers, { getState }) => {
@@ -59,8 +59,24 @@ export const authApi = createApi({
         body,
       }),
     }),
+    changePassword: builder.mutation({
+      query: body => ({
+        url: API_ENDPOINTS.auth.changePassword,
+        method: 'PATCH',
+        body,
+      }),
+    }),
     getProfile: builder.query({
       query: () => API_ENDPOINTS.member.profile,
+      providesTags: ['Profile'],
+    }),
+    updateProfile: builder.mutation({
+      query: body => ({
+        url: API_ENDPOINTS.member.profile,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: result => (result?.success ? ['Profile'] : []),
     }),
     getNetworks: builder.query({
       query: () => API_ENDPOINTS.member.networks,
@@ -101,7 +117,9 @@ export const {
   useForgotPasswordMutation,
   useVerifyResetOtpMutation,
   useResetPasswordMutation,
+  useChangePasswordMutation,
   useGetProfileQuery,
+  useUpdateProfileMutation,
   useGetNetworksQuery,
   useGetServicesQuery,
   useApplyMembershipMutation,

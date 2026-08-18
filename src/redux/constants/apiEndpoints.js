@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     forgotPassword: 'auth/forgotPassword',
     verifyResetOtp: 'auth/verifyResetOtp',
     resetPassword: 'auth/resetPassword',
+    changePassword: 'auth/changePassword',
   },
   member: {
     profile: 'member/profile/',

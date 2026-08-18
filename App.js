@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast, { BaseToast } from 'react-native-toast-message';
 import Routes from './src/routes/Index';
 import { AppColors } from './src/utils/AppColors';
+import { FontFamily } from './src/utils/Fonts';
 
 const toastConfig = {
   success: props => (
@@ -94,10 +95,14 @@ const styles = StyleSheet.create({
     color: AppColors.black,
     fontSize: 13,
     lineHeight: 17,
+    fontFamily: FontFamily.regular,
+    fontWeight: '400',
   },
   toastMessage: {
     fontSize: 12,
     lineHeight: 16,
+    fontFamily: FontFamily.regular,
+    fontWeight: '400',
   },
 });
 

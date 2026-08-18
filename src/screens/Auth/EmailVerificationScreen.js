@@ -26,6 +26,10 @@ import {
 import { setCredentials } from '../../redux/slices/authSlice';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { showToast } from '../../utils/Toast';
+import {
+  isMemberUser,
+  showMemberAccountRequiredToast,
+} from '../../utils/authRole';
 
 const RESEND_SECONDS = 159;
 
@@ -99,12 +103,18 @@ const EmailVerificationScreen = ({ navigation, route, setSafeAreaColor }) => {
         return;
       }
 
-      showToast(response?.message || 'Email verified successfully.');
       if (nextScreen === 'Main') {
+        if (!isMemberUser(response?.data?.user)) {
+          showMemberAccountRequiredToast(showToast);
+          return;
+        }
+
         dispatch(setCredentials(response?.data));
+        showToast(response?.message || 'Email verified successfully.');
         return;
       }
 
+      showToast(response?.message || 'Email verified successfully.');
       navigation.navigate(nextScreen, { email });
     } catch (error) {
       showToast('Verification failed', getApiErrorMessage(error), 'error');

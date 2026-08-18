@@ -1,5 +1,11 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Feather } from '@react-native-vector-icons/feather';
 import AppText from './AppText';
 import { AppColors } from '../utils/AppColors';
@@ -27,7 +33,7 @@ const MenuSection = ({ title, items = [], containerStyle }) => {
             key={item.label}
             activeOpacity={0.8}
             onPress={item.onPress}
-            style={styles.row}>
+            style={[styles.row, item.onToggle && styles.toggleRow]}>
             <View style={styles.iconBox}>
               <Feather
               name={item.iconName}
@@ -44,11 +50,37 @@ const MenuSection = ({ title, items = [], containerStyle }) => {
               {item.label}
             </AppText>
 
-            <Feather
-              name="chevron-right"
-              color={AppColors.themeTxt2}
-              size={responsiveFontSize(2.2)}
-            />
+            {item.onToggle ? (
+              item.toggleLoading ? (
+                <View style={styles.toggleLoader}>
+                  <ActivityIndicator
+                    color={AppColors.appThemeBlue}
+                    size="small"
+                  />
+                </View>
+              ) : (
+                <View style={styles.toggleWrap}>
+                  <Switch
+                    value={item.toggleValue}
+                    disabled={item.toggleDisabled}
+                    onValueChange={item.onToggle}
+                    trackColor={{
+                      false: '#AAC1E3',
+                      true: AppColors.appThemeDimBlue,
+                    }}
+                    thumbColor={AppColors.white}
+                    ios_backgroundColor="#AAC1E3"
+                    style={styles.compactSwitch}
+                  />
+                </View>
+              )
+            ) : (
+              <Feather
+                name="chevron-right"
+                color={AppColors.themeTxt2}
+                size={responsiveFontSize(2.2)}
+              />
+            )}
           </TouchableOpacity>
         ))}
       </View>
@@ -76,6 +108,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: responsiveWidth(3.1),
   },
+  toggleRow: {
+    paddingRight: responsiveWidth(4.5),
+  },
   iconBox: {
     width: responsiveWidth(8.2),
     height: responsiveWidth(8.2),
@@ -87,6 +122,21 @@ const styles = StyleSheet.create({
   label: {
     flex: 1,
     marginLeft: responsiveWidth(3.6),
+  },
+  toggleLoader: {
+    width: responsiveWidth(9.5),
+    height: responsiveHeight(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toggleWrap: {
+    width: responsiveWidth(9.5),
+    height: responsiveHeight(4),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactSwitch: {
+    transform: [{ scaleX: 0.64 }, { scaleY: 0.64 }],
   },
 });
 
