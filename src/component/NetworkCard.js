@@ -1,8 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import SVGXml from './SvgXml';
-import { AppIcons } from '../assets/Icons/Index';
+import Feather from '@react-native-vector-icons/feather';
 import { AppColors } from '../utils/AppColors';
 import { FontFamily } from '../utils/Fonts';
 import {
@@ -30,6 +29,7 @@ const ChevronIcon = () => (
 const NetworkCard = ({
   title = 'Dallas Network',
   description = 'Lorem ipsum simply dummy',
+  iconName = 'map-pin',
   onPress,
 }) => {
   return (
@@ -38,10 +38,10 @@ const NetworkCard = ({
       onPress={onPress}
       style={styles.card}>
       <View style={styles.iconBox}>
-        <SVGXml
-          icon={AppIcons.network}
-          width={responsiveWidth(7.4)}
-          height={responsiveWidth(7.4)}
+        <Feather
+          name={iconName}
+          color={AppColors.white}
+          size={responsiveWidth(7.2)}
         />
       </View>
 

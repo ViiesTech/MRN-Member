@@ -15,11 +15,17 @@ const NotificationCard = ({
   description,
   time,
   iconName = 'bell',
-  isUnread = false,
   onPress,
+  disabled = false,
 }) => {
+  const isInteractive = Boolean(onPress) && !disabled;
+
   return (
-    <TouchableOpacity activeOpacity={0.85} onPress={onPress} style={styles.card}>
+    <TouchableOpacity
+      activeOpacity={isInteractive ? 0.85 : 1}
+      disabled={!isInteractive}
+      onPress={isInteractive ? onPress : undefined}
+      style={styles.card}>
       <View style={styles.iconBox}>
         <Feather
           name={iconName}
@@ -56,7 +62,8 @@ const NotificationCard = ({
         </AppText>
       </View>
 
-      {isUnread && <View style={styles.unreadDot} />}
+      {/* Unread indicator is temporarily hidden. */}
+      {/* {isUnread && <View style={styles.unreadDot} />} */}
     </TouchableOpacity>
   );
 };
@@ -97,13 +104,13 @@ const styles = StyleSheet.create({
     marginTop: responsiveHeight(0.45),
     lineHeight: responsiveFontSize(1.85),
   },
-  unreadDot: {
-    width: responsiveWidth(2.1),
-    height: responsiveWidth(2.1),
-    borderRadius: responsiveWidth(1.05),
-    backgroundColor: AppColors.appThemeDimBlue,
-    marginLeft: responsiveWidth(1.6),
-  },
+  // unreadDot: {
+  //   width: responsiveWidth(2.1),
+  //   height: responsiveWidth(2.1),
+  //   borderRadius: responsiveWidth(1.05),
+  //   backgroundColor: AppColors.appThemeDimBlue,
+  //   marginLeft: responsiveWidth(1.6),
+  // },
 });
 
 export default NotificationCard;

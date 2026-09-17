@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
 import SVGXml from '../component/SvgXml';
 import { FilledTabIcons } from '../assets/Icons/FilledTabIcons';
-import HomeScreen from '../screens/Main/HomeScreen';
-import IntroductionsScreen from '../screens/Main/IntroductionsScreen';
-import MoreScreen from '../screens/Main/MoreScreen';
-import Reports from '../screens/Main/Reports';
+import MemberHomeScreen from '../screens/Main/MemberFlow/HomeScreen';
+import IntroductionsScreen from '../screens/Main/MemberFlow/IntroductionsScreen';
+import MoreScreen from '../screens/Main/Common/MoreScreen';
+import Reports from '../screens/Main/Common/Reports';
+import ConsumerHomeScreen from '../screens/Main/ConsumerFlow/HomeScreen';
+import InformationScreen from '../screens/Main/Common/InformationScreen';
+import NotificationsScreen from '../screens/Main/Common/NotificationsScreen';
+import { useGetProfileQuery } from '../redux/Services/authApi';
+import { setUser } from '../redux/slices/authSlice';
 import { AppColors } from '../utils/AppColors';
 import { FontFamily } from '../utils/Fonts';
 import {
@@ -107,31 +113,98 @@ const getScreenOptions = ({ route, bottomInset }) => ({
 });
 
 const BottomStack = ({ setSafeAreaColor }) => {
+  const dispatch = useDispatch();
   const { bottom: bottomInset } = useSafeAreaInsets();
+  const user = useSelector(state => state.auth.user);
+  const { data: profileResponse } = useGetProfileQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  const membershipStatus = `${
+    user?.membership?.status ?? user?.membershipStatus ?? ''
+  }`
+    .trim()
+    .toLowerCase();
+  const isApprovedMember = membershipStatus === 'approved';
+
+  useEffect(() => {
+    if (profileResponse?.success && profileResponse?.data) {
+      dispatch(setUser(profileResponse.data));
+    }
+  }, [dispatch, profileResponse]);
 
   return (
     <Tab.Navigator
+      key={isApprovedMember ? 'member-tabs' : 'consumer-tabs'}
+      initialRouteName="Home"
       screenOptions={({ route }) =>
         getScreenOptions({ route, bottomInset })
       }>
       <Tab.Screen name="Home">
         {props => (
-          <HomeScreen {...props} setSafeAreaColor={setSafeAreaColor} />
+          isApprovedMember ? (
+            <MemberHomeScreen
+              {...props}
+              setSafeAreaColor={setSafeAreaColor}
+            />
+          ) : (
+            <ConsumerHomeScreen
+              {...props}
+              setSafeAreaColor={setSafeAreaColor}
+            />
+          )
         )}
       </Tab.Screen>
-      <Tab.Screen name="Introductions">
-        {props => (
-          <IntroductionsScreen
-            {...props}
-            setSafeAreaColor={setSafeAreaColor}
-          />
-        )}
-      </Tab.Screen>
-      <Tab.Screen name="Reports">
-        {props => (
-          <Reports {...props} setSafeAreaColor={setSafeAreaColor} />
-        )}
-      </Tab.Screen>
+      {isApprovedMember ? (
+        <>
+          <Tab.Screen name="Introductions">
+            {props => (
+              <IntroductionsScreen
+                {...props}
+                setSafeAreaColor={setSafeAreaColor}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Information">
+            {props => (
+              <InformationScreen
+                {...props}
+                setSafeAreaColor={setSafeAreaColor}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Reports">
+            {props => (
+              <Reports {...props} setSafeAreaColor={setSafeAreaColor} />
+            )}
+          </Tab.Screen>
+        </>
+      ) : (
+        <>
+          <Tab.Screen name="Information">
+            {props => (
+              <InformationScreen
+                {...props}
+                setSafeAreaColor={setSafeAreaColor}
+              />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Reports">
+            {props => (
+              <Reports {...props} setSafeAreaColor={setSafeAreaColor} />
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Notification">
+            {props => (
+              <NotificationsScreen
+                {...props}
+                isTab
+                audience="consumer"
+                setSafeAreaColor={setSafeAreaColor}
+              />
+            )}
+          </Tab.Screen>
+        </>
+      )}
       <Tab.Screen name="More">
         {props => (
           <MoreScreen {...props} setSafeAreaColor={setSafeAreaColor} />
@@ -148,7 +221,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
     backgroundColor: 'transparent',
     paddingTop: responsiveHeight(0.55),
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   tabBarGradient: {
     flex: 1,

@@ -9,6 +9,10 @@ import Toast, { BaseToast } from 'react-native-toast-message';
 import Routes from './src/routes/Index';
 import { AppColors } from './src/utils/AppColors';
 import { FontFamily } from './src/utils/Fonts';
+import {
+  getFcmToken,
+  initializeNotifications,
+} from './src/utils/notifications';
 
 const toastConfig = {
   success: props => (
@@ -52,6 +56,13 @@ const App = () => {
   useEffect(() => {
     // hide nav bar when app loads
     SystemNavigationBar.stickyImmersive();
+    const unsubscribeNotifications = initializeNotifications();
+
+    getFcmToken().then(token => {
+      console.log('[Member App FCM Token]:', token || 'Not available');
+    });
+
+    return unsubscribeNotifications;
   }, []);
 
   return (

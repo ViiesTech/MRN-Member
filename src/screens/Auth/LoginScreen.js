@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import {
   AppButton,
@@ -19,41 +19,76 @@ import { useSigninMutation } from '../../redux/Services/authApi';
 import { setCredentials } from '../../redux/slices/authSlice';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { showToast } from '../../utils/Toast';
-import {
-  isMemberUser,
-  showMemberAccountRequiredToast,
-} from '../../utils/authRole';
+import { getFcmToken } from '../../utils/notifications';
+import DeviceInfo from 'react-native-device-info';
 
 const LoginScreen = ({ navigation, setSafeAreaColor }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [notificationDevice, setNotificationDevice] = useState(null);
   const [signin, { isLoading }] = useSigninMutation();
   const dispatch = useDispatch();
 
   useSafeAreaColor(setSafeAreaColor, AppColors.appBgColor);
+  useEffect(() => {
+    const prepareNotificationDevice = async () => {
+      try {
+        const [token, deviceId, deviceName] = await Promise.all([
+          getFcmToken().catch(() => null),
+          DeviceInfo.getUniqueId().catch(() => null),
+          DeviceInfo.getDeviceName().catch(() => null),
+        ]);
 
+        console.log('Device Info:', {
+          token,
+          deviceId,
+          deviceName,
+          platform: Platform.OS,
+        });
+
+        // Tumhari requirement:
+        // FCM token nahi hai to notificationDevice send hi nahi karna.
+        if (!token) {
+          setNotificationDevice(null);
+          return;
+        }
+
+        setNotificationDevice({
+          token,
+          platform: Platform.OS,
+          ...(deviceId && { deviceId }),
+          ...(deviceName && { deviceName }),
+        });
+      } catch (error) {
+        console.log('Notification device setup error:', error);
+        setNotificationDevice(null);
+      }
+    };
+
+    prepareNotificationDevice();
+  }, []);
   const handleLogin = async () => {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail || !password) {
-      showToast('Missing fields', 'Please enter email and password.', 'error');
+      showToast(
+        'Missing fields',
+        'Please enter email and password.',
+        'error',
+      );
       return;
     }
 
     try {
-      const response = await signin({
+      const payload = {
         email: normalizedEmail,
         password,
-      }).unwrap();
+        ...(notificationDevice && { notificationDevice }),
+      };
 
-      if (
-        response?.success &&
-        response?.data?.user &&
-        !isMemberUser(response.data.user)
-      ) {
-        showMemberAccountRequiredToast(showToast);
-        return;
-      }
+      console.log('Login Payload:', payload);
+
+      const response = await signin(payload).unwrap();
 
       if (response?.success && response?.isVerified === false) {
         showToast(response?.message || 'Please verify your email.');
@@ -62,17 +97,13 @@ const LoginScreen = ({ navigation, setSafeAreaColor }) => {
           email: normalizedEmail,
           password,
           type: 'login',
+          notificationDevice,
         });
         return;
       }
 
       if (!response?.success) {
         showToast('Login failed', response?.message || 'Please try again.', 'error');
-        return;
-      }
-
-      if (!isMemberUser(response?.data?.user)) {
-        showMemberAccountRequiredToast(showToast);
         return;
       }
 

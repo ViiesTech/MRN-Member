@@ -26,6 +26,7 @@ const IntroductionCard = ({
   showStatusOption = false,
   nextStatusLabel,
   onStatusOptionPress,
+  direction,
   style,
 }) => {
   const isOutline = actionType === 'outline';
@@ -35,7 +36,21 @@ const IntroductionCard = ({
       <View style={styles.cardContent}>
         <UserAvatar uri={profile} style={styles.avatar} />
         <View style={styles.info}>
-          <AppText style={styles.name}>{name}</AppText>
+          <View style={styles.nameRow}>
+            <AppText numberOfLines={1} style={styles.name}>{name}</AppText>
+            {!!direction && (
+              <View style={styles.badge}>
+                <AppText style={styles.badgeText}>
+                  {direction === 'sent' ? 'Sent' : 'Received'}
+                </AppText>
+                <Feather
+                  name={direction === 'sent' ? 'arrow-up-right' : 'arrow-down-left'}
+                  color={AppColors.white}
+                  size={responsiveFontSize(1.4)}
+                />
+              </View>
+            )}
+          </View>
           <AppText style={styles.service}>{service}</AppText>
           <View style={styles.locationRow}>
             <Feather
@@ -120,11 +135,35 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: responsiveWidth(3),
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: responsiveWidth(1.5),
+  },
   name: {
+    flex: 1,
     color: AppColors.themeTxt,
     fontFamily: FontFamily.bold,
     fontSize: responsiveFontSize(1.78),
     lineHeight: responsiveFontSize(2.25),
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: responsiveWidth(1),
+    borderRadius: responsiveHeight(1.4),
+    backgroundColor: AppColors.appThemeBlue,
+    paddingHorizontal: responsiveWidth(2.6),
+    paddingVertical: responsiveHeight(0.35),
+    minHeight: responsiveHeight(2.7),
+  },
+  badgeText: {
+    color: AppColors.white,
+    fontFamily: FontFamily.semiBold,
+    fontSize: responsiveFontSize(1.3),
+    includeFontPadding: false,
   },
   service: {
     marginTop: responsiveHeight(0.35),

@@ -26,10 +26,6 @@ import {
 import { setCredentials } from '../../redux/slices/authSlice';
 import { getApiErrorMessage } from '../../utils/apiError';
 import { showToast } from '../../utils/Toast';
-import {
-  isMemberUser,
-  showMemberAccountRequiredToast,
-} from '../../utils/authRole';
 
 const RESEND_SECONDS = 159;
 
@@ -51,6 +47,8 @@ const EmailVerificationScreen = ({ navigation, route, setSafeAreaColor }) => {
   const password = route?.params?.password;
   const type = route?.params?.type;
   const signupPayload = route?.params?.signupPayload;
+  const notificationDevice =
+    route?.params?.notificationDevice ?? signupPayload?.notificationDevice;
   const isResendLoading =
     isResending || isResendingSignup || isResendingForgotPassword;
   const isVerifyLoading = isLoading || isVerifyingResetOtp;
@@ -89,10 +87,13 @@ const EmailVerificationScreen = ({ navigation, route, setSafeAreaColor }) => {
 
     try {
       const verifyMutation = type === 'forgotPassword' ? verifyResetOtp : verifyOtp;
-      const response = await verifyMutation({
+      const verificationPayload = {
         email,
         otp,
-      }).unwrap();
+        ...(type !== 'forgotPassword' &&
+          notificationDevice?.token && { notificationDevice }),
+      };
+      const response = await verifyMutation(verificationPayload).unwrap();
 
       if (!response?.success) {
         showToast(
@@ -104,11 +105,6 @@ const EmailVerificationScreen = ({ navigation, route, setSafeAreaColor }) => {
       }
 
       if (nextScreen === 'Main') {
-        if (!isMemberUser(response?.data?.user)) {
-          showMemberAccountRequiredToast(showToast);
-          return;
-        }
-
         dispatch(setCredentials(response?.data));
         showToast(response?.message || 'Email verified successfully.');
         return;
@@ -143,6 +139,7 @@ const EmailVerificationScreen = ({ navigation, route, setSafeAreaColor }) => {
         response = await signin({
           email,
           password,
+          ...(notificationDevice?.token && { notificationDevice }),
         }).unwrap();
       } else if (type === 'signup') {
         if (!signupPayload) {

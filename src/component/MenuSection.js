@@ -33,12 +33,19 @@ const MenuSection = ({ title, items = [], containerStyle }) => {
             key={item.label}
             activeOpacity={0.8}
             onPress={item.onPress}
-            style={[styles.row, item.onToggle && styles.toggleRow]}>
-            <View style={styles.iconBox}>
+            disabled={item.loading || item.disabled}
+            accessibilityState={{ disabled: Boolean(item.disabled) }}
+            style={[
+              styles.row,
+              item.onToggle && styles.toggleRow,
+              item.disabled && styles.disabledRow,
+            ]}>
+            <View
+              style={[styles.iconBox, item.disabled && styles.disabledIconBox]}>
               <Feather
-              name={item.iconName}
-              color={AppColors.white}
-              size={responsiveFontSize(2.1)}
+                name={item.iconName}
+                color={AppColors.white}
+                size={responsiveFontSize(2.1)}
               />
             </View>
 
@@ -74,6 +81,19 @@ const MenuSection = ({ title, items = [], containerStyle }) => {
                   />
                 </View>
               )
+            ) : item.loading ? (
+              <ActivityIndicator
+                color={AppColors.appThemeBlue}
+                size="small"
+              />
+            ) : item.rightIcon ? (
+              <Feather
+                name={item.rightIcon}
+                color={
+                  item.disabled ? AppColors.bodyText : AppColors.themeTxt2
+                }
+                size={responsiveFontSize(2.05)}
+              />
             ) : (
               <Feather
                 name="chevron-right"
@@ -111,6 +131,9 @@ const styles = StyleSheet.create({
   toggleRow: {
     paddingRight: responsiveWidth(4.5),
   },
+  disabledRow: {
+    opacity: 0.62,
+  },
   iconBox: {
     width: responsiveWidth(8.2),
     height: responsiveWidth(8.2),
@@ -118,6 +141,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: AppColors.themeTxt2,
+  },
+  disabledIconBox: {
+    backgroundColor: '#7896BD',
   },
   label: {
     flex: 1,

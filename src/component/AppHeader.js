@@ -19,6 +19,7 @@ const AppHeader = ({
   showBack = false,
   leftIcon,
   rightIcon,
+  rightContent,
   onLeftPress,
   onRightPress,
   containerStyle,
@@ -93,14 +94,18 @@ const AppHeader = ({
         {subtitleFirst ? subtitleFirstContent : titleContent}
       </View>
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        accessibilityRole={onRightPress ? 'button' : undefined}
-        disabled={!onRightPress}
-        onPress={onRightPress}
-        style={[styles.iconButton, rightButtonStyle]}>
-        {rightIcon}
-      </TouchableOpacity>
+      {rightContent ? (
+        <View style={rightButtonStyle}>{rightContent}</View>
+      ) : (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          accessibilityRole={onRightPress ? 'button' : undefined}
+          disabled={!onRightPress}
+          onPress={onRightPress}
+          style={[styles.iconButton, rightButtonStyle]}>
+          {rightIcon}
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

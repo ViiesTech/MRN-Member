@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import SVGXml from './SvgXml';
+import Feather from '@react-native-vector-icons/feather';
 import { AppColors } from '../utils/AppColors';
 import { FontFamily } from '../utils/Fonts';
 import {
@@ -9,7 +9,13 @@ import {
   responsiveWidth,
 } from '../utils/Responsive_Dimensions';
 
-const ServiceCard = ({ title, description, icon, selected = false, onPress }) => {
+const ServiceCard = ({
+  title,
+  description,
+  iconName = 'briefcase',
+  selected = false,
+  onPress,
+}) => {
   return (
     <TouchableOpacity
       activeOpacity={0.85}
@@ -22,10 +28,10 @@ const ServiceCard = ({ title, description, icon, selected = false, onPress }) =>
       </View>
 
       <View style={styles.iconBox}>
-        <SVGXml
-          icon={icon}
-          width={responsiveWidth(9)}
-          height={responsiveWidth(9)}
+        <Feather
+          name={iconName}
+          color={AppColors.white}
+          size={responsiveWidth(8.5)}
         />
       </View>
 

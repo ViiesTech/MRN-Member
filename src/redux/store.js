@@ -10,13 +10,22 @@ import {
   persistReducer,
   persistStore,
 } from 'redux-persist';
-import authReducer from './slices/authSlice';
+import authReducer, { clearCredentials } from './slices/authSlice';
+import chatReducer from './slices/chatSlice';
 import { authApi } from './Services/authApi';
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
   auth: authReducer,
+  chat: chatReducer,
   [authApi.reducerPath]: authApi.reducer,
 });
+
+const rootReducer = (state, action) => {
+  if (action.type === clearCredentials.type) {
+    state = undefined;
+  }
+  return appReducer(state, action);
+};
 
 const persistConfig = {
   key: 'root',
